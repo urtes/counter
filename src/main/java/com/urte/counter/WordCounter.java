@@ -20,6 +20,10 @@ public class WordCounter {
     private TreeMap<String, Long> words = new TreeMap<>();
     private long excludeCounter = 0;
 
+    protected void setWordsToExclude(Set<String> wordsToExclude) {
+        this.wordsToExclude = wordsToExclude;
+    }
+
     public TreeMap<String, Long> getWords() {
         return words;
     }
@@ -61,7 +65,7 @@ public class WordCounter {
      * Counts words occurrences in {@code String[]}, while excluding words given in exclusion file
      * @param wordsInLine
      */
-    private void countWordsInLine(String[] wordsInLine) {
+    protected void countWordsInLine(String[] wordsInLine) {
         for (String word : wordsInLine) {
             word = word.toLowerCase();
             if (wordsToExclude.contains(word)) {
