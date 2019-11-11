@@ -26,6 +26,7 @@ public class WordCountingService {
     }
 
     public void generateWordCountReports() {
+        setExcludes();
         countWordsInFiles();
         generateReports();
     }
@@ -47,18 +48,16 @@ public class WordCountingService {
 
     private void countWordsInLine(String[] wordsInLine) {
 
-        setExcludes();
-
         for (int i = 0; i < wordsInLine.length; i++) {
-            String word = wordsInLine[i];
+            String word = wordsInLine[i].toLowerCase();
             if (wordsToExclude.contains(word)) {
                 excludeCounter++;
             } else {
                 if (!words.containsKey(word)) {
-                    words.put(wordsInLine[i], 1l);
+                    words.put(word, 1l);
                 } else {
-                    long count = words.get(wordsInLine[i]);
-                    words.put(wordsInLine[i], count + 1l);
+                    long count = words.get(word);
+                    words.put(word, count + 1l);
                 }
             }
         }
@@ -115,17 +114,18 @@ public class WordCountingService {
 
     private Set<String> getWordsToExclude(File exclude) {
 
-        Set<String> wordsToExclude = new HashSet<>();
+        Set<String> wordsToExcludeInLowerCase = new HashSet<>();
 
         try (Stream<String> stream = Files.lines(Paths.get(exclude.getPath()))) {
-            wordsToExclude = stream
+            Set<String> wordsToExclude = stream
                     .map(line -> line.split("[\\s\\p{Punct}]+"))
                     .flatMap(array -> Arrays.stream(array))
                     .collect(Collectors.toSet());
+            wordsToExclude.forEach(word -> wordsToExcludeInLowerCase.add(word.toLowerCase()));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return wordsToExclude;
+        return wordsToExcludeInLowerCase;
     }
 
 }
