@@ -31,9 +31,33 @@ public class WordCountingService {
         generateReports();
     }
 
+    private void setExcludes() {
+        File exclude = new File(PATH + EXCLUDE_FILENAME);
+        if(exclude.exists()) {
+            wordsToExclude = getWordsToExclude(exclude);
+        }
+    }
+
+    private Set<String> getWordsToExclude(File exclude) {
+
+        Set<String> wordsToExcludeInLowerCase = new HashSet<>();
+
+        try (Stream<String> stream = Files.lines(Paths.get(exclude.getPath()))) {
+            Set<String> wordsToExclude = stream
+                    .map(line -> line
+                            .split("[\\s\\p{Punct}]+"))
+                    .filter(array -> array.length != 0 || !array[0].equals(""))
+                    .flatMap(array -> Arrays.stream(array))
+                    .collect(Collectors.toSet());
+            wordsToExclude.forEach(word -> wordsToExcludeInLowerCase.add(word.toLowerCase()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return wordsToExcludeInLowerCase;
+    }
+
     private void countWordsInFiles() {
         INPUT_FILES.forEach(file -> countWordsInFile(file));
-//        words.entrySet().forEach(count -> System.out.println(count.getKey() + ": " + count.getValue()));
     }
 
     private void countWordsInFile(File file) {
@@ -68,23 +92,34 @@ public class WordCountingService {
         generateExcludesReport();
     }
 
-    private void generateCountReports() {
+    private void generateCountReports()  {
+        char previousLetter = ' ';
+        char currentLetter;
+        PrintWriter writer = null;
 
-        File file = new File(PATH + "output.txt");
-        file.getParentFile().mkdirs();
-        PrintWriter printWriter = null;
+        for (Map.Entry<String, Long> word : words.entrySet()) {
+            currentLetter = word.getKey().toUpperCase().charAt(0);
 
-        try {
-            printWriter = new PrintWriter(file);
-            for(Map.Entry<String, Long> word : words.entrySet()) {
-                printWriter.println(String.format("%s: %d", word.getKey(), word.getValue()));
+            if (currentLetter != previousLetter) {
+
+                if (writer != null) {
+                    writer.close();
+                }
+
+                File file = new File(String.format("%s%s.txt", PATH, currentLetter));
+                try {
+                    writer = new PrintWriter(file);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                previousLetter = currentLetter;
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } finally {
-            if (printWriter != null) {
-                printWriter.close();
-            }
+
+            writer.println(String.format("%s: %d", word.getKey(), word.getValue()));
+        }
+
+        if (writer != null) {
+            writer.close();
         }
     }
 
@@ -104,28 +139,4 @@ public class WordCountingService {
             }
         }
     }
-
-    private void setExcludes() {
-        File exclude = new File(PATH + EXCLUDE_FILENAME);
-        if(exclude.exists()) {
-            wordsToExclude = getWordsToExclude(exclude);
-        }
-    }
-
-    private Set<String> getWordsToExclude(File exclude) {
-
-        Set<String> wordsToExcludeInLowerCase = new HashSet<>();
-
-        try (Stream<String> stream = Files.lines(Paths.get(exclude.getPath()))) {
-            Set<String> wordsToExclude = stream
-                    .map(line -> line.split("[\\s\\p{Punct}]+"))
-                    .flatMap(array -> Arrays.stream(array))
-                    .collect(Collectors.toSet());
-            wordsToExclude.forEach(word -> wordsToExcludeInLowerCase.add(word.toLowerCase()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return wordsToExcludeInLowerCase;
-    }
-
 }
