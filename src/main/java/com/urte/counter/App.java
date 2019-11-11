@@ -6,9 +6,11 @@ import java.util.List;
 
 public class App
 {
+    final static String PATH = "IOFiles/";
+    final static String EXTENTION = ".txt";
+
     public static void main( String[] args )
     {
-        final String PATH = "IOFiles/";
         List<File> files = new ArrayList<>();
 
         if (args.length < 1) {
@@ -17,19 +19,19 @@ public class App
 
         for (int i = 0; i < args.length; i++) {
             File inputFile = new File(PATH + args[i]);
-            if(inputFile.exists() && inputFile.getName().endsWith(".txt")) {
+            if(inputFile.exists() && inputFile.getName().endsWith(EXTENTION)) {
                 files.add(inputFile);
             } else {
                 exit();
             }
         }
 
-        WordCountingService reader = new WordCountingService(files, PATH);
-        reader.generateWordCountReports();
+        WordService wordService = new WordService();
+        wordService.generateWordCountReports(files, PATH);
     }
 
     static void exit() {
-        final String ERROR_MESSAGE = "Enter names of existing .txt input files";
+        final String ERROR_MESSAGE = String.format("Enter names of existing %s input files", EXTENTION);
         System.out.println(ERROR_MESSAGE);
         System.exit(1);
     }
