@@ -8,16 +8,19 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Counts words from given output files and generates data used by reports
+ */
 public class WordCounter {
 
     private final String PATH;
     private final String EXCLUDE_FILENAME = "exclude.txt";
     private final List<File> inputFiles;
     private Set<String> wordsToExclude = new HashSet<>();
-    private Map<String, Long> words = new TreeMap<>();
+    private TreeMap<String, Long> words = new TreeMap<>();
     private long excludeCounter = 0;
 
-    public Map<String, Long> getWords() {
+    public TreeMap<String, Long> getWords() {
         return words;
     }
 
@@ -30,12 +33,53 @@ public class WordCounter {
         this.PATH = path;
     }
 
-    public Map<String, Long> countWordsInFiles() {
+    /**
+     * Counts words occurrences in given files, while excluding words given in exclusion file
+     */
+    public void countWordsInFiles() {
         setExcludes();
         inputFiles.forEach(file -> countWordsInFile(file));
-        return words;
     }
 
+    /**
+     * Counts words occurrences in a given file, while excluding words given in exclusion file
+     * @param file
+     */
+    private void countWordsInFile(File file) {
+        try (Stream<String> lines = Files.lines(Paths.get(file.getPath()))) {
+            lines
+                    .map(line -> line.trim())
+                    .filter(line -> !line.isEmpty())
+                    .map(line -> line.split("[\\s\\p{Punct}]+"))
+                    .forEach(array -> countWordsInLine(array));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Counts words occurrences in {@code String[]}, while excluding words given in exclusion file
+     * @param wordsInLine
+     */
+    private void countWordsInLine(String[] wordsInLine) {
+        for (String word : wordsInLine) {
+            word = word.toLowerCase();
+            if (wordsToExclude.contains(word)) {
+                excludeCounter++;
+            } else {
+                if (!words.containsKey(word)) {
+                    words.put(word, 1l);
+                } else {
+                    long count = words.get(word);
+                    words.put(word, count + 1l);
+                }
+            }
+        }
+    }
+
+    /**
+     * Sets words to exclude from counting occurrences, according to words given in exclusion file if it exists
+     */
     private void setExcludes() {
         File exclude = new File(PATH + EXCLUDE_FILENAME);
         if(exclude.exists()) {
@@ -43,6 +87,12 @@ public class WordCounter {
         }
     }
 
+    /**
+     * Sets words to exclude from counting occurrences, according to words given in exclusion file
+     *
+     * @param exclude file with words to exclude from counting occurrences
+     * @return {@code Set<String>}, representing words that need to be excluded
+     */
     private Set<String> getWordsToExclude(File exclude) {
 
         Set<String> wordsToExcludeInLowerCase = new HashSet<>();
@@ -59,33 +109,5 @@ public class WordCounter {
             e.printStackTrace();
         }
         return wordsToExcludeInLowerCase;
-    }
-
-    private void countWordsInFile(File file) {
-        try (Stream<String> lines = Files.lines(Paths.get(file.getPath()))) {
-            lines
-                    .map(line -> line.trim())
-                    .filter(line -> !line.isEmpty())
-                    .map(line -> line.split("[\\s\\p{Punct}]+"))
-                    .forEach(array -> countWordsInLine(array));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void countWordsInLine(String[] wordsInLine) {
-        for (String word : wordsInLine) {
-            word = word.toLowerCase();
-            if (wordsToExclude.contains(word)) {
-                excludeCounter++;
-            } else {
-                if (!words.containsKey(word)) {
-                    words.put(word, 1l);
-                } else {
-                    long count = words.get(word);
-                    words.put(word, count + 1l);
-                }
-            }
-        }
     }
 }

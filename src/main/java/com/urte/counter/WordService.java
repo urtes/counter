@@ -3,6 +3,9 @@ package com.urte.counter;
 import java.io.File;
 import java.util.*;
 
+/**
+ * Triggers word counting and reports generating
+ */
 public class WordService {
 
     public void generateWordCountReports(List<File> inputFiles, String PATH) {
