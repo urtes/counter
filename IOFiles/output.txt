@@ -1,3 +1,0 @@
-atakama: 2
-atata: 1
-bobo: 1
