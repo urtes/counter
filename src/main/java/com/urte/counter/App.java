@@ -10,7 +10,6 @@ public class App
     {
         final String PATH = "IOFiles/";
         List<File> files = new ArrayList<>();
-        WordCountingService reader = new WordCountingService();
 
         if (args.length < 1) {
             exit();
@@ -25,7 +24,8 @@ public class App
             }
         }
 
-        reader.generateWordCountReports(files);
+        WordCountingService reader = new WordCountingService(files, PATH);
+        reader.generateWordCountReports();
     }
 
     static void exit() {
