@@ -14,5 +14,4 @@ To run the application download counter-1.0-RELEASE.jar file from Releases. In t
 
 ## Usage
 
-To start the application go to directory where counter-1.0-RELEASE.jar file is located and enter `java -jar counter-1
-.0-RELEASE.jar yourinputfile.txt`. The application will report files in IOFiles directory as a result.
+To start the application go to directory where counter-1.0-RELEASE.jar file is located and enter `java -jar counter-1.0-RELEASE.jar yourinputfile.txt`. The application will report files in IOFiles directory as a result.
