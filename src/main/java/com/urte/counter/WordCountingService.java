@@ -42,10 +42,11 @@ public class WordCountingService {
 
         Set<String> wordsToExcludeInLowerCase = new HashSet<>();
 
-        try (Stream<String> stream = Files.lines(Paths.get(exclude.getPath()))) {
-            Set<String> wordsToExclude = stream
-                    .map(line -> line
-                            .split("[\\s\\p{Punct}]+"))
+        try (Stream<String> lines = Files.lines(Paths.get(exclude.getPath()))) {
+            Set<String> wordsToExclude = lines
+                    .map(line -> line.trim())
+                    .filter(line -> !line.isEmpty())
+                    .map(line -> line.split("[\\s\\p{Punct}]+"))
                     .filter(array -> array.length != 0 || !array[0].equals(""))
                     .flatMap(array -> Arrays.stream(array))
                     .collect(Collectors.toSet());
@@ -61,8 +62,10 @@ public class WordCountingService {
     }
 
     private void countWordsInFile(File file) {
-        try (Stream<String> stream = Files.lines(Paths.get(file.getPath()))) {
-            stream
+        try (Stream<String> lines = Files.lines(Paths.get(file.getPath()))) {
+            lines
+                    .map(line -> line.trim())
+                    .filter(line -> !line.isEmpty())
                     .map(line -> line.split("[\\s\\p{Punct}]+"))
                     .forEach(array -> countWordsInLine(array));
         } catch (IOException e) {
